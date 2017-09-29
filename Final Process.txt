@@ -1,0 +1,245 @@
+Start:
+------
+> cd
+> cat /etc/os-release
+> sudo yum install -y git
+> rpm -qa | grep git
+> sudo yum install -y java-1.8.0
+> sudo yum install -y java-1.8.0-devel
+> rpm -qa | grep java
+> sudo yum update
+> sudo yum whatprovides maven
+
+*	cd /opt/
+> ls
+> sudo yum install -y wget
+
+* MAVEN:
+--------
+
+> sudo wget http://www-us.apache.org/dist/maven/maven-3/3.5.0/binaries/apache-maven-3.5.0-bin.tar.gz
+
+> sudo tar xf apache-maven-3.5.0-bin.tar.gz
+> sudo ln -s apache-maven-3.5.0 maven
+> ls -la
+> sudo vi /etc/profile.d/maven.sh
+	
+
+> source /etc/profile.d/maven.sh
+> mvn -version
+
+* NEXUS:
+--------
+> sudo wget http://www.sonatype.org/downloads/nexus-latest-bundle.tar.gz
+> sudo tar xf nexus-latest-bundle.tar.gz
+> ls
+> cd nexus-2.14.5-02/
+> cd bin/
+> ./nexus start
+> sudo ./nexus start
+
+> sudo yum install -y net-tools
+> sudo netstat -ntpl
+> rpm -qa | grep nexus
+
+> If there is a problem in starting nexus check below... 
+
+> Owner should be same eg: "Dinesh Dinesh"
+	If not "chown"
+> sudo chown -R Dinesh:Dinesh nexus-2.14.5-02/
+> sudo chown -R Dinesh:Dinesh sonatype-work/
+> sudo netstat -ntpl
+
+* JENKINS:
+----------
+> cd /opt/
+
+> sudo wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo
+
+> sudo rpm --import https://pkg.jenkins.io/redhat/jenkins.io.key
+
+> sudo yum -y install jenkins
+> sudo ln -s /home/jenkins /var/lib/jenkins
+> sudo systemctl start jenkins
+> sudo systemctl enable jenkins
+> sudo netstat -ntpl
+> sudo vi /var/lib/jenkins/secrets/initialAdminPassword
+
+
+* Mysql database:
+-----------------
+> sudo wget https://repo.mysql.com/mysql-community-release-el7-5.noarch.rpm
+
+> sudo rpm -ivh mysql-community-release-el7-5.noarch.rpm
+> sudo yum -y install mysql-server
+> sudo systemctl start mysqld
+> sudo mysql_secure_installation
+> sudo mysql -u root -p
+
+mysql> CREATE DATABASE sonar;
+Query OK, 1 row affected (0.00 sec)
+
+mysql> CREATE USER 'sonar' IDENTIFIED BY 'sonar';
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> GRANT ALL ON sonar.* TO 'sonar'@'localhost' IDENTIFIED BY 'sonar';
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> flush privileges;
+Query OK, 0 rows affected (0.00 sec)
+
+quit
+
+* SonarQube:
+------------
+> google - yum sonar repo
+
+> sudo wget -O /etc/yum.repos.d/sonar.repo http://downloads.sourceforge.net/project/sonar-pkg/rpm/sonar.repo
+
+> sudo yum install -y sonar
+
+> sudo find / -name sonar.properties
+	/opt/sonar/conf/sonar.properties
+
+> vi /opt/sonar/conf/sonar.properties
+
+	edit
+	user name
+passwd
+	web server remove # web host 0.0.0.0
+port 9000
+
+> sudo systemctl start sonar
+> sudo netstat -ntpl
+
+	login to sonar through ip
+	admin 
+	admin
+
+* Tomcat:
+--------- 
+
+> sudo yum -y install tomcat
+> sudo yum install -y tomcat tomcat-webapps tomcat-admin-webapps
+> sudo vi /usr/share/tomcat/conf/tomcat-users.xml
+
+under tomcat users
+
+<user username="tomcat" password="tomcat" roles="manager-gui"/>
+<user username="tomcat1" password="tomcat1" roles="manager-script"/>
+
+start tomcat
+
+> sudo netstat -ntpl | grep 7777
+> sudo systemctl start tomcat
+> sudo systemctl enable tomcat
+> sudo netstat -ntpl
+
+> sudo wget http://www-us.apache.org/dist/tomcat/tomcat-7/v7.0.81/bin/apache-tomcat-7.0.81.tar.gz
+
+> sudo tar xvf apache-tomcat-7.0.81.tar.gz
+
+> cd apache-tomcat-7.0.81
+> sudo ./startup.sh
+
+
+* nmap "ip" (35.193.174.224)
+
+> sudo mysql -u root -p
+
+From git add another mysql database "websystqie
+
+goto jenkins
+
+
+* INSTALL all the plugins
+
+> Global too configuration
+
+> Configuration System
+
+Create Jobs:
+
+JOB 1:
+
+> Validation code: 
+	GIT : Provide git URL
+	Build : Invoke top level maven targets
+		Maven version
+		Goals: Validate compile
+
+JOB 2:
+
+>Unit test : (JUnit plugin)
+	GIT : Provide git URL
+	Build : Invoke top level maven targets
+		Maven version
+		Goals: Test 
+	Post-buildActions: Publish JUnit test result report
+					Test report XMLs - (**/target/surefire-reports/*.xml)
+
+
+
+			
+JOB 3:
+
+> CodeCoverage: (CObertura plugin)
+	GIT : Provide git URL
+	Build : Invoke top level maven targets
+		Maven version
+	Goals : obertura:cobertura -Dcobertura.report.format=xml
+	Post-build actions: Publish Cobertura coverage Report
+Cobertura xml report pattern - (**/target/site/cobertura/coverage.xml)
+
+
+JOB 4:
+
+> Documentation: (JavaDoc plugin)
+	GIT : Provide git URL
+	Build : Invoke top level maven targets
+		Maven version
+		Goals : javadoc:javadoc
+	Post-build Actions:
+	Javadoc directory - "target/site/apidocs"
+
+
+JOB 5:
+
+> NEXUS: (nexus plugin)
+	GIT : Provide git URL
+	Build : Invoke top level maven targets
+		Maven version
+		Goals : clean package
+	Nexus Repository Manager Publisher
+	Nexus Instance		(Nexus)
+ 	Nexus Repository	(Release)	
+ 	Packages			Group	: com.websystique.springmvc
+ 					Artifact:	SpringHibernateExample
+ 					Version :	1.0.1
+ 					Packaging :(WAR)
+	Artifacts 
+			Maven artifact
+			File Path	 (target/SpringHibernateExample.war)
+
+	Post build actions: Archive the artifacts
+					Files to archive (target/*.war)
+
+
+JOB 6 :
+
+> Deployment: (deploy to container plugin)
+	GIT : Provide git URL
+	Build : Invoke top level maven targets
+		Maven version
+		Goals : clean package
+	Post-build Actions: Deploy war/ear to container
+			WAR/EAR files (**/*.war)
+			Context path  (/springproject)
+			containers	:	Tomcat 7.x
+				Credentials (add tomcat username password) 
+				Tomcat URL ( )
+ 	
+
+
+
+
