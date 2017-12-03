@@ -1,0 +1,71 @@
+    1  cd
+    2  lll
+    3  ll
+    4  sudo usermod -aG google-sudoers python
+    5  sudo usermod -aG python google-sudoers
+    6  sudo usermod -aG wheel python
+    7  usermod -aG wheel python
+    8  exit
+    9  cd
+   10  ll
+   11  pip3.6 install virtualenv
+   12   pip install https://github.com/pypa/virtualenv/tarball/1.9.X
+   13  pip3.6 install https://github.com/pypa/virtualenv/tarball/1.9.X
+   14   sudo pip install virtualenv
+   15  sudo pip3.6 install virtualenv
+   16  mkdir environments
+   17  ll
+   18  cd environments/
+   19  python3.6 -m venv my_env
+   20  ll
+   21  cd my_env/
+   22  ll
+   23  cd bin/
+   24  ll
+   25  cd ..
+   26  source my_env/bin/activate
+   27  pip3.6 install django
+   28  ll
+   29  pip3.6 install psycopg2
+   30  ll
+   31  cd my_env/
+   32  ll
+   33  git init
+   34  git pull https://github.com/RaviKiran25494/django.git
+   35  ll
+   36  cd students2
+   37  ll
+   38  cd ..
+   39  l
+   40  ll
+   41  cd students2
+   42  l
+   43  ll
+   44  cd students28/
+   45  ll
+   46  sudo vim settings.py
+   47  cp settings.py settings.py.bak
+   48  ll
+   49  sudo vim settings.py
+   50  ll
+   51  cd ..
+   52  ll
+   53  python manage.py migrate
+   54  python manage.py makemigrations leads
+   55  python manage.py createsuperuser
+   56  python manage.py runserver
+   57  python manage.py runserver 8081
+   58  python manage.py runserver
+   59  history
+
+If error occurs:
+
+Deactivate venv
+sudo vi my_env/lib/python3.6/site-packages
+djngo - core - management - commands - runserver.py
+
+edit 12.0.0.1 to 0.0.0.0
+
+Add your public IP in settings.py file ( Allowed hosts)
+
+Delete demo in urls.py
